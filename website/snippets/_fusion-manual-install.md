@@ -50,3 +50,7 @@ If you already have the <Constant name="fusion_engine" /> installed, you can ski
 
     The installer adds this path automatically, but you may need to reload your shell for the `dbtf` command to work.
 
+:::info Adapter drivers are downloaded separately
+This installs the Fusion CLI binary only. Adapter drivers (for connecting to Snowflake, BigQuery, and other platforms) are downloaded automatically from `public.cdn.getdbt.com` the first time you run a dbt command. This requires outbound HTTPS access to the CDN. If your network restricts access, see [Adapter network requirements](/docs/fusion/install-fusion-cli#adapter-network-requirements).
+:::
+

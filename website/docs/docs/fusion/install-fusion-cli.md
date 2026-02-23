@@ -33,7 +33,38 @@ dbtf system uninstall
 
 ## Adapter installation
 
-The Fusion install automatically includes adapters outlined in the [Fusion requirements](/docs/fusion/supported-features#requirements). Other adapters will be available at a later date.
+Adapter drivers are **not** included in the Fusion binary. Instead, Fusion automatically downloads the correct [ADBC](https://arrow.apache.org/adbc/) adapter driver for your data platform the first time you run a dbt command (such as `dbt run`, `dbt debug`, or `dbt compile`). Fusion detects which adapter you need based on your `profiles.yml` configuration and downloads only that single driver.
+
+:::tip
+In most cases, you don't need to do anything &mdash; Fusion handles adapter installation automatically on first use. The `dbt system install-drivers` command downloads **all** supported drivers (Snowflake, BigQuery, Postgres, Databricks, Redshift, DuckDB, and Salesforce) at once. This is only useful if you work across multiple data platforms and want to pre-cache every driver before going offline or switching projects.
+:::
+
+### Network requirements {#adapter-network-requirements}
+
+Adapter driver downloads require outbound HTTPS access to the dbt CDN:
+
+| Resource | URL | Purpose |
+| --- | --- | --- |
+| **Adapter drivers** | `https://public.cdn.getdbt.com` | Downloads ADBC adapter driver libraries (`.dylib`, `.so`, `.dll`) on first use or when running `dbt system install-drivers` |
+
+:::caution Enterprise proxy considerations
+
+Adapter drivers are native shared libraries (`.dylib` on macOS, `.so` on Linux, `.dll` on Windows). Some enterprise proxy filters and security tools classify these file types as executables and may block the download &mdash; even if `public.cdn.getdbt.com` is allowlisted at the domain level.
+
+If your organization's proxy blocks adapter driver downloads, work with your IT team to ensure both:
+
+1. The domain `public.cdn.getdbt.com` is allowlisted.
+2. Content inspection rules permit downloading native library file types (`.dylib`, `.so`, `.dll`) from that domain.
+
+For environments where proxy configuration changes are not feasible, see [Restricted network installation](#restricted-network-installation) below.
+
+:::
+
+### Restricted network installation
+
+If your environment cannot access `public.cdn.getdbt.com` for adapter driver downloads, you can pre-build a bundle of the fusion binary and the adapter drivers into a single `.tar.gz` or Docker image and host it on an internally approved fileshare.
+
+For supported adapters, refer to [Fusion requirements](/docs/fusion/supported-features#requirements).
 
 ## Environment variables
 
@@ -104,6 +135,7 @@ Common issues and resolutions:
 - **dbt command not found:** Ensure installation location is correctly added to your `$PATH`.
 - **Version conflicts:** Verify no existing <Constant name="core" /> or dbt CLI versions are installed (or active) that could conflict with Fusion.
 - **Installation permissions:** Confirm your user has appropriate permissions to install software locally.
+- **Adapter driver download blocked:** If `dbt run` or `dbt debug` fails because the adapter driver cannot be downloaded, your network may be blocking access to `public.cdn.getdbt.com` or filtering native library file types. See [Adapter network requirements](#adapter-network-requirements) for proxy configuration guidance, or [Restricted network installation](#restricted-network-installation) for an alternative that does not require CDN access.
 
 ## Frequently asked questions
 
