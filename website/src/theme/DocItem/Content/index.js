@@ -7,7 +7,6 @@ import MDXContent from "@theme/MDXContent";
 import IntroText from "@site/src/components/IntroText";
 import QuickstartTOC from "@site/src/components/quickstartTOC";
 import {QuickstartGuideTitle} from "../../../components/quickstartGuideCard";
-import { Feedback } from "../../../components/feedback";
 import Availability from "@site/src/components/availability";
 import AvailabilityContext from "@site/src/components/availabilityContext";
 
@@ -70,7 +69,7 @@ export default function DocItemContent({ children }) {
         <MDXContent>{children}</MDXContent>
       )}
 
-      <Feedback />
+
     </div>
     </AvailabilityContext.Provider>
   );
