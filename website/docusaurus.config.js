@@ -3,6 +3,7 @@ import math from "remark-math";
 import katex from "rehype-katex";
 import rehypeCodeLanguage from "./plugins/rehypeCodeLanguage.js";
 import remarkBlogFootnoteLinks from "./plugins/remarkBlogFootnoteLinks.js";
+const rewriteMarkdownLinks = require("./plugins/rewriteMarkdownLinks.js");
 const { themes } = require('prism-react-renderer')
 
 const { products, versions, versionedPages, versionedCategories } = require("./dbt-versions");
@@ -499,6 +500,9 @@ var siteSettings = {
         },
       },
     ],
+    // Must run after @signalwire/docusaurus-plugin-llms-txt so the generated
+    // .md files exist when its postBuild rewrites their links to be relative.
+    rewriteMarkdownLinks,
   ],
   scripts: [
     {
