@@ -51,8 +51,11 @@ var siteSettings = {
   tagline: "End user documentation, guides and technical reference for dbt",
   title: "dbt Developer Hub",
   url: SITE_URL,
-  onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "throw",
+  // Per-version markdown builds gate pages out on purpose, so cross-page links
+  // to them are expected to dangle. SKIP_LINK_CHECK relaxes the check for those
+  // builds only; normal builds keep failing hard.
+  onBrokenLinks: process.env.SKIP_LINK_CHECK ? "warn" : "throw",
+  onBrokenMarkdownLinks: process.env.SKIP_LINK_CHECK ? "warn" : "throw",
   trailingSlash: false,
   headTags: [
     // Load Optimizely synchronously (no async/defer) so experiments apply
