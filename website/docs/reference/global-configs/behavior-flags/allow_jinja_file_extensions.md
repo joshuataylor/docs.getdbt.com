@@ -2,6 +2,7 @@
 title: "Jinja file extensions"
 id: "allow_jinja_file_extensions"
 sidebar_label: "allow jinja file extensions"
+description: "Recognize Jinja-style file extension suffixes (.j2, .jinja, .jinja2) on .sql and .md files."
 ---
 
 | allow_jinja_file_extensions | <Constant name="dbt" /> **Latest** | <Constant name="core" /> |
