@@ -6,6 +6,7 @@ import rehypeCleanMarkdown from "./plugins/rehypeCleanMarkdown.js";
 import rehypeTabsToHeadings from "./plugins/rehypeTabsToHeadings.js";
 import rehypeMdHide from "./plugins/rehypeMdHide.js";
 import rehypeBrToBreak from "./plugins/rehypeBrToBreak.js";
+import rehypeIframeToLink from "./plugins/rehypeIframeToLink.js";
 import remarkBlogFootnoteLinks from "./plugins/remarkBlogFootnoteLinks.js";
 import remarkConstantsInCode from "./plugins/remarkConstantsInCode.js";
 const { themes } = require('prism-react-renderer')
@@ -400,12 +401,27 @@ var siteSettings = {
           relativePaths: false,
         },
         processing: {
-          beforeDefaultRehypePlugins: [rehypeCodeLanguage, rehypeCleanMarkdown, rehypeTabsToHeadings, rehypeMdHide, rehypeBrToBreak],
+          // Generated index pages (category/tags/doc-id landing pages) have no
+          // `.theme-doc-markdown`; the plugin defaults then fall through to
+          // `main .container .col` / `article`, which match each DocCard, and
+          // extractContent() keeps only the first -- losing the whole card list
+          // and the h1. (routeRules can't fix this: resolveRouteConfiguration
+          // matches a `structure.sections` route first and never consults them.)
+          // Drop the per-card selectors so index pages resolve to the wrapper
+          // holding the header and every card: `main .container` for category
+          // and doc-id pages, `main` for tags pages (which have no `.container`).
+          // Ordinary doc pages still match `.theme-doc-markdown` first.
+          contentSelectors: ['.theme-doc-markdown', 'main .container', 'main .theme-doc-wrapper', 'main'],
+          beforeDefaultRehypePlugins: [rehypeCodeLanguage, rehypeCleanMarkdown, rehypeTabsToHeadings, rehypeMdHide, rehypeBrToBreak, rehypeIframeToLink],
         },
         include: {
           includeBlog: false,
           includePages: false,
           includeDocs: true,
+          // Custom React pages with no article container -- extractContent()
+          // falls back to `#__docusaurus` and dumps navbar/search/filter chrome
+          // (or a single card for the home page). Not doc content; drop them.
+          excludeRoutes: ['/', '/guides', '/search'],
         },
         // Content organization
         structure: {
