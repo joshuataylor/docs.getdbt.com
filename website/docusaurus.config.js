@@ -7,6 +7,7 @@ import rehypeTabsToHeadings from "./plugins/rehypeTabsToHeadings.js";
 import rehypeMdHide from "./plugins/rehypeMdHide.js";
 import rehypeMdOnly from "./plugins/rehypeMdOnly.js";
 import llmsContentSelectors from "./plugins/llmsContentSelectors.js";
+import rehypeBrToBreak from "./plugins/rehypeBrToBreak.js";
 import remarkBlogFootnoteLinks from "./plugins/remarkBlogFootnoteLinks.js";
 import remarkConstantsInCode from "./plugins/remarkConstantsInCode.js";
 const { themes } = require('prism-react-renderer')
@@ -398,7 +399,7 @@ var siteSettings = {
           relativePaths: false,
         },
         processing: {
-          beforeDefaultRehypePlugins: [rehypeCodeLanguage, rehypeCleanMarkdown, rehypeTabsToHeadings, rehypeMdHide, rehypeMdOnly],
+          beforeDefaultRehypePlugins: [rehypeCodeLanguage, rehypeCleanMarkdown, rehypeTabsToHeadings, rehypeMdHide, rehypeMdOnly, rehypeBrToBreak],
           // Adds a [data-md-root] marker ahead of the defaults; see the module.
           contentSelectors: llmsContentSelectors,
         },
