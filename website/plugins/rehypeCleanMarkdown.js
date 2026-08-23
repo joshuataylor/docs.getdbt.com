@@ -34,6 +34,15 @@
  *    renders as a single family emoji) and both appear in Indic/Persian text,
  *    so stripping them corrupts real content.
  *
+ * 6. Anchors whose href is exactly "#". Dead links, and the `<Lightbox>`
+ *    `<a href="#" data-featherlight>` wrapper around an image, which converts
+ *    to `[![alt](src)](#)Caption`. Unwrap the anchor (keep its children) so the
+ *    image and caption survive without the bogus `](#)` link.
+ *
+ * 7. Icon-only links. An `<a href="...">` whose only content is an `<svg>`
+ *    (a decorative `<Icon>` glyph, no text, no image) converts to `[](url)`.
+ *    Drop it; the same destination is reached by an adjacent text link.
+ *
  * Runs in the conversion pipeline only (beforeDefaultRehypePlugins); the
  * rendered site is unaffected.
  */
@@ -43,6 +52,20 @@ import { visit, SKIP } from "unist-util-visit";
 // plain-text consumer. Scoped to U+200B only; see rule 5 for why the joiners
 // (U+200C/U+200D) are left alone.
 const ZERO_WIDTH = /\u200B/g;
+
+function hasText(node) {
+  if (node.type === "text") {
+    return node.value.trim() !== "";
+  }
+  return (node.children || []).some(hasText);
+}
+
+function hasImage(node) {
+  if (node.type === "element" && node.tagName === "img") {
+    return true;
+  }
+  return (node.children || []).some(hasImage);
+}
 
 export default function rehypeCleanMarkdown() {
   return (tree) => {
@@ -65,6 +88,16 @@ export default function rehypeCleanMarkdown() {
         return;
       }
 
+      const href = node.properties?.href;
+
+      // Rule 6: unwrap `<a href="#">` -- keep its children so a lightbox image
+      // and its caption survive without the bogus `](#)` wrapper.
+      if (node.tagName === "a" && href === "#") {
+        parent.children.splice(index, 1, ...node.children);
+        // Re-visit at this index to process the spliced-in children.
+        return index;
+      }
+
       const className = node.properties?.className;
       const isHashLink =
         node.tagName === "a" &&
@@ -74,11 +107,19 @@ export default function rehypeCleanMarkdown() {
       const ariaHidden = node.properties?.ariaHidden;
       const isAriaHidden = ariaHidden === true || ariaHidden === "true";
 
-      const href = node.properties?.href;
       const isEmptyHrefAnchor =
         node.tagName === "a" && (href === undefined || href === "");
 
-      if (!isHashLink && !isAriaHidden && !isEmptyHrefAnchor) {
+      // Rule 7: icon-only link -- real href, but no text and no image (just an
+      // <svg> glyph), which would convert to an empty `[](url)`.
+      const isIconOnlyLink =
+        node.tagName === "a" &&
+        typeof href === "string" &&
+        href !== "" &&
+        !hasText(node) &&
+        !hasImage(node);
+
+      if (!isHashLink && !isAriaHidden && !isEmptyHrefAnchor && !isIconOnlyLink) {
         return;
       }
 
