@@ -17,6 +17,13 @@
  *    JSX expressions, and they survive into the markdown as literal comments,
  *    e.g. every generated category-index card: `## [<icon><!-- --> <!-- -->Title](...)`.
  *
+ * 4. Anchors with no href. Site chrome renders JS-driven buttons as bare
+ *    anchors (`<a onClick=...>` with no href) -- the guide step-menu toggle
+ *    (`quickstartTOC` `<a>Menu ...</a>`), the version switcher, and similar.
+ *    They convert to empty links (`[Menu ]()`, `[v2]()`, `[]()`) that point
+ *    nowhere. A real content link always carries an href, so an absent/empty
+ *    href is a reliable "this is chrome" signal.
+ *
  * Runs in the conversion pipeline only (beforeDefaultRehypePlugins); the
  * rendered site is unaffected.
  */
@@ -46,7 +53,11 @@ export default function rehypeCleanMarkdown() {
       const ariaHidden = node.properties?.ariaHidden;
       const isAriaHidden = ariaHidden === true || ariaHidden === "true";
 
-      if (!isHashLink && !isAriaHidden) {
+      const href = node.properties?.href;
+      const isEmptyHrefAnchor =
+        node.tagName === "a" && (href === undefined || href === "");
+
+      if (!isHashLink && !isAriaHidden && !isEmptyHrefAnchor) {
         return;
       }
 
