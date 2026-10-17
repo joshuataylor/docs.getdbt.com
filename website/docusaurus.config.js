@@ -8,6 +8,7 @@ import rehypeMdHide from "./plugins/rehypeMdHide.js";
 import rehypeMdOnly from "./plugins/rehypeMdOnly.js";
 import llmsContentSelectors from "./plugins/llmsContentSelectors.js";
 import rehypeBrToBreak from "./plugins/rehypeBrToBreak.js";
+import rehypeIframeToLink from "./plugins/rehypeIframeToLink.js";
 import remarkBlogFootnoteLinks from "./plugins/remarkBlogFootnoteLinks.js";
 import remarkConstantsInCode from "./plugins/remarkConstantsInCode.js";
 const { themes } = require('prism-react-renderer')
@@ -399,14 +400,20 @@ var siteSettings = {
           relativePaths: false,
         },
         processing: {
-          beforeDefaultRehypePlugins: [rehypeCodeLanguage, rehypeCleanMarkdown, rehypeTabsToHeadings, rehypeMdHide, rehypeMdOnly, rehypeBrToBreak],
-          // Adds a [data-md-root] marker ahead of the defaults; see the module.
+          beforeDefaultRehypePlugins: [rehypeCodeLanguage, rehypeCleanMarkdown, rehypeTabsToHeadings, rehypeMdHide, rehypeMdOnly, rehypeBrToBreak, rehypeIframeToLink],
+          // Adds a [data-md-root] marker ahead of the defaults and drops the
+          // per-card defaults; see the module.
           contentSelectors: llmsContentSelectors,
         },
         include: {
           includeBlog: false,
           includePages: false,
           includeDocs: true,
+          // Custom React pages with no article container -- extractContent()
+          // falls back to `#__docusaurus` and dumps navbar/search/filter chrome.
+          // Not doc content, so drop them. The homepage is kept: it marks its
+          // root with data-md-root (see llmsContentSelectors).
+          excludeRoutes: ['/guides', '/search'],
         },
         // Content organization
         structure: {

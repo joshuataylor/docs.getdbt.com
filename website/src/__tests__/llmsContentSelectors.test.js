@@ -16,7 +16,7 @@ describe('llms-txt content selectors', () => {
   it('puts the data-md-root marker ahead of the plugin defaults', () => {
     expect(llmsContentSelectors[0]).toBe('[data-md-root]');
     expect(llmsContentSelectors).toEqual(
-      expect.arrayContaining(['.theme-doc-markdown', 'article', 'main']),
+      expect.arrayContaining(['.theme-doc-markdown', 'main']),
     );
   });
 
@@ -45,5 +45,19 @@ describe('llms-txt content selectors', () => {
       </div></div></div></main>
     `);
     expect(selector).toBe('.theme-doc-markdown');
+  });
+
+  it('converts every card on a generated index page, not just the first', () => {
+    const { selector, element } = selectContent(`
+      <main><div class="container"><header><h1>List of commands</h1></header>
+        <section class="row">
+          <article class="col"><a href="/reference/commands/build"><h2>build</h2></a></article>
+          <article class="col"><a href="/reference/commands/run"><h2>run</h2></a></article>
+        </section>
+      </div></main>
+    `);
+    expect(selector).toBe('main .container');
+    expect(element.querySelector('h1')).toHaveTextContent('List of commands');
+    expect(element.querySelectorAll('article')).toHaveLength(2);
   });
 });
